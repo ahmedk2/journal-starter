@@ -48,33 +48,35 @@ class EntryCreate(BaseModel):
 
 
 class EntryUpdate(BaseModel):
+    # we had to set a default to allow none values for the strings
+    # as well as set the default to None in case no value is passed
     work: Annotated[
-        str,
+        str | None,
         StringConstraints(min_length=1, max_length=256, strip_whitespace=True),
         Field(
             default=None,
             description="What did you work on today?",
             json_schema_extra={"example": "Studied FastAPI and built my first API endpoints"},
         ),
-    ]
+    ] = None
     struggle: Annotated[
-        str,
+        str | None,
         StringConstraints(min_length=1, max_length=256, strip_whitespace=True),
         Field(
             default=None,
             description="What's one thing you struggled with today?",
             json_schema_extra={"example": "Understanding async/await syntax and when to use it"},
         ),
-    ]
+    ] = None
     intention: Annotated[
-        str,
+        str | None,
         StringConstraints(min_length=1, max_length=256, strip_whitespace=True),
         Field(
             default=None,
             description="What will you study/work on tomorrow?",
             json_schema_extra={"example": "Practice PostgreSQL queries and database design"},
         ),
-    ]
+    ] = None
 
 
 class Entry(BaseModel):

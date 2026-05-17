@@ -47,9 +47,16 @@ class EntryService:
             logger.warning("Entry %s not found. Update aborted.", entry_id)
             return None
 
+        # this was added to not look at values with none
+        # we want to prevent fields that weren't updated being included in the updated_data dict
+        new_dict = {}
+        for key, value in updated_data.items():
+            if value is not None:
+                new_dict[key] = value
+
         updated_data = {
             **existing_entry,
-            **updated_data,
+            **new_dict,
             "id": entry_id,
             "updated_at": datetime.now(UTC),
         }

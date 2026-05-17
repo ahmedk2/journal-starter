@@ -85,9 +85,9 @@ async def analyze_journal_entry(
         raise ValueError()
 
     valid_analyst_json = json.loads(response.choices[0].message.content)
-    # print(VALID_ANALYSIS_JSON)
+    # print(valid_analyst_json)
 
-    # we did this to fetch the output from VALID_ANALYSIS_JSON and retrive the values in the dictionary
+    # we did this to fetch the output from valid_analyst_json and retrive the values in the dictionary
     return {
         "entry_id": entry_id,
         "sentiment": valid_analyst_json["sentiment"],

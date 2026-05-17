@@ -12,6 +12,8 @@ Set OPENAI_API_KEY, and optionally OPENAI_BASE_URL and OPENAI_MODEL
 in your .env file. Settings are loaded by ``api.config.Settings``.
 """
 
+import json
+
 from openai import AsyncOpenAI
 
 from api.config import get_settings
@@ -62,7 +64,33 @@ async def analyze_journal_entry(
       4. Parse the assistant's JSON response with ``json.loads()``.
       5. Return a dict with ``entry_id``, ``sentiment``, ``summary``, ``topics``.
     """
-    raise NotImplementedError(
-        "Task 4: implement analyze_journal_entry using the openai SDK. "
-        "See tests/test_llm_service.py for the test contract."
+    if client is None:
+        client = _default_client()
+
+    # here it was important to have the system know what to do based on my user content
+    # it needed to know how I want the data returned and what the keys/values should be
+    response = await client.chat.completions.create(
+        model=get_settings().openai_model,
+        messages=[
+            {
+                "role": "system",
+                "content": "Return a dict in JSON format with ``entry_id``, ``sentiment``, ``summary``, ``topics``. The sentiment key should the value be either postive, negative or neutral. The summary key should the values summarize the entry_text. The topics key should have the value be a list of subjects or nouns mentioned in the entry_text",
+            },
+            {"role": "user", "content": entry_text},
+        ],
     )
+
+    # added this to prevent error if json.loads message content is empty
+    if response.choices[0].message.content is None:
+        raise ValueError()
+
+    valid_analyst_json = json.loads(response.choices[0].message.content)
+    # print(VALID_ANALYSIS_JSON)
+
+    # we did this to fetch the output from VALID_ANALYSIS_JSON and retrive the values in the dictionary
+    return {
+        "entry_id": entry_id,
+        "sentiment": valid_analyst_json["sentiment"],
+        "summary": valid_analyst_json["summary"],
+        "topics": valid_analyst_json["topics"],
+    }
